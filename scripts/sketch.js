@@ -155,12 +155,12 @@ const zeroPad = (num, places) => String(num).padStart(places, '0');
 function preload() {
     main_font.bold = loadFont('./assets/fonts/Roboto/Roboto-Bold.ttf');
 
-    City.shader = loadShader('../assets/shaders/holo.vert', '../assets/shaders/holo.frag');
-    gridTexture = loadImage('../assets/textures/grid.png');
+    City.shader = loadShader('./assets/shaders/holo.vert', '../assets/shaders/holo.frag');
+    gridTexture = loadImage('./assets/textures/grid.png');
 
     const opts = 'normalize: true';
     for (let i = 1; i <= 6; i++) {
-        Building.smallModels.push(loadModel('../assets/models/building_small_' + zeroPad(i, 2) + '.obj', opts));
+        Building.smallModels.push(loadModel('./assets/models/building_small_' + zeroPad(i, 2) + '.obj', opts));
     }
     // Building.smallModels.push(loadModel('../assets/models/building_small_02.obj', opts));
     // Building.smallModels.push(loadModel('../assets/models/building_small_03.obj', opts));
