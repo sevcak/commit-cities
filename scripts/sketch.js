@@ -86,7 +86,6 @@ function drawGrid() {
 
     rotateX(PI / 2);
 
-    //emissiveMaterial(180, 86, 4);
     textureMode(NORMAL);
     textureWrap(REPEAT, REPEAT);
     texture(gridTexture);
@@ -119,6 +118,24 @@ function drawGrid() {
 function drawUI() {
     if (activeCity) {
         document.getElementById("city-info").style.setProperty('display', 'block');
+    }
+}
+
+function openSettings() {
+    const settingsElem = document.getElementById("settings");
+
+    document.getElementById('github-api-key').value = LOCAL_AUTH_TOKEN;
+
+    settingsElem.style.setProperty("display", "flex");
+}
+
+function applySettings() {
+    const settingsElem = document.getElementById("settings");
+
+    settingsElem.style.setProperty("display", "none");
+    const newApiKey = document.getElementById('github-api-key').value;
+    if (newApiKey) {
+        LOCAL_AUTH_TOKEN = newApiKey;
     }
 }
 
@@ -162,8 +179,6 @@ function preload() {
     for (let i = 1; i <= 6; i++) {
         Building.smallModels.push(loadModel('./assets/models/building_small_' + zeroPad(i, 2) + '.obj', opts));
     }
-    // Building.smallModels.push(loadModel('../assets/models/building_small_02.obj', opts));
-    // Building.smallModels.push(loadModel('../assets/models/building_small_03.obj', opts));
 }
 
 function setup() {
@@ -270,7 +285,7 @@ function draw() {
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth - 40, windowHeight - 100);
+    resizeCanvas(windowWidth, windowHeight);
 }
 
 function mouseWheel() {

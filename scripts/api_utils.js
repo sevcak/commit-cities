@@ -34,7 +34,11 @@ query($username: String!, $repoLimit: Int!, $commitLimit: Int!) {
 }`;
 
 async function fetch_github_data(variables) {
-  const token = MY_AUTH_TOKEN;
+  const token = LOCAL_AUTH_TOKEN;
+  if (!token) {
+    console.error("No auth token was provided!");
+    return;
+  }
 
   try {
     const response = await fetch("https://api.github.com/graphql", {
