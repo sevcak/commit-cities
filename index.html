@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="./libs/p5.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div id="ui">
+        <div id="controls">
+            <input type="text" id="username" placeholder="Enter GitHub username">
+            <button onclick="fetchGitHubData()">Generate Commit Cities</button>
+            <button class="settings-button" onclick=""><i class="fa fa-cog"></i></button>
+        </div>
+        <div id="world-label" style="display: none">
+            <div id="world-label-username"></div>'s Commit Cities
+        </div>
+        <div id="city-info" class="ui-box">
+            <div>
+                <div>repository</div>
+                <h2 id="city-info-name">city_name</h2>
+                <div id="city-info-starcount">star_count</div>
+            </div>
+            <div>
+                <h3>Commits</h3>
+                <div id="city-info-commits"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="./my_env.js"></script>
+    <script src="./scripts/api_utils.js"></script>
+    <script src="./scripts/sketch.js"></script>
+    <script src="./scripts/building.js"></script>
+    <script src="./scripts/city.js"></script>
+    <script src="./scripts/poission_disc_sampling.js"></script>
+</body>
+</html>
