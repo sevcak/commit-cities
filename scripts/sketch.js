@@ -155,7 +155,7 @@ const zeroPad = (num, places) => String(num).padStart(places, '0');
 function preload() {
     main_font.bold = loadFont('./assets/fonts/Roboto/Roboto-Bold.ttf');
 
-    City.shader = loadShader('./assets/shaders/holo.vert', '../assets/shaders/holo.frag');
+    City.shader = loadShader('./assets/shaders/holo.vert', './assets/shaders/holo.frag');
     gridTexture = loadImage('./assets/textures/grid.png');
 
     const opts = 'normalize: true';
