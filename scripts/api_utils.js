@@ -1,3 +1,5 @@
+let LOCAL_AUTH_TOKEN = undefined;
+
 const github_api_query = `
 query($username: String!, $repoLimit: Int!, $commitLimit: Int!) {
   user(login: $username) {
