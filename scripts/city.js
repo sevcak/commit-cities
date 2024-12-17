@@ -55,9 +55,9 @@ class City {
     resetShader();
     shader(City.shader);
 
-    let cityHue = hue(this.color);
+    let cityHue = hue(this.color) % 360;
     const glowColor = color(
-      hue(this.color),
+      cityHue,
       saturation(this.color),
       this == activeCity ? brightness(this.color) : 50
     );
