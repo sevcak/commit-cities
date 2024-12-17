@@ -18,6 +18,7 @@ let cam;
 let main_font = {};
 let gridTexture;
 let gridShader;
+let preloadJson;
 
 let skybox;
 
@@ -75,12 +76,28 @@ function updateUserSelect() {
     }
 }
 
+function preloadCities() {
+    const downloadedCities = { users: [] };
+
+    console.log(preloadJson);
+
+    for (const [username, repositories] of Object.entries(preloadJson)) {
+        console.log(username, repositories);
+        localStorage.setItem(username, JSON.stringify(repositories));
+
+        downloadedCities.users.push(username);
+    }
+
+    localStorage.setItem("lastCityUsername", downloadedCities.users[0]);
+
+    localStorage.setItem("downloadedCities", JSON.stringify(downloadedCities));
+}
+
 function loadCities(username) {
     document.getElementById("world-label-username").textContent = username;
     document.getElementById("world-label").style = "";
 
     repos = JSON.parse(localStorage.getItem(username));
-    console.log(username, repos);
     generateCities(repos);
 
     localStorage.setItem("lastCityUsername", username);
@@ -236,6 +253,10 @@ function preload() {
         };
         Building.largeModels.push(modelData);
     }
+
+    if (!localStorage.getItem("downloadedCities")) {
+        preloadJson = loadJSON("./assets/data/preloadedCities.json", preloadCities)
+    }
 }
 
 function setup() {
@@ -281,15 +302,15 @@ function setup() {
     }
     updateUserSelect();
 
-    document.getElementById("user-select").addEventListener("change", (event) => {
-        loadCities(event.target.value);
-    })
-
     const lastCityUsername = localStorage.getItem("lastCityUsername");
     if (lastCityUsername) {
         loadCities(lastCityUsername);
         document.getElementById("user-select").value = lastCityUsername;
     }
+
+    document.getElementById("user-select").addEventListener("change", (event) => {
+        loadCities(event.target.value);
+    })
 }
 
 function draw() {
