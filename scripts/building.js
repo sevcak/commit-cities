@@ -1,6 +1,7 @@
 class Building {
   static smallModels = [];
   static largeModels = [];
+  static largeThreshold = 100;
 
   constructor(commit, pos) {
     this.commit = commit;
@@ -9,14 +10,13 @@ class Building {
 
     const changeCount = commit.additions + commit.deletions;
 
-    if (changeCount < 20) {
-
+    if (changeCount < Building.largeThreshold) {
       this.model = random(Building.smallModels);
+      this.box = this.model.calculateBoundingBox();
     } else {
-      this.model = random(Building.smallModels);
+      this.model = random(Building.largeModels);
+      this.box = this.model.bottom.calculateBoundingBox();
     }
-
-    this.box = this.model.calculateBoundingBox();
   }
 
   draw() {
@@ -24,7 +24,30 @@ class Building {
 
     translate(this.pos.x, 0, this.pos.y);
     rotateY(this.rotation);
-    model(this.model);
+
+    const changeCount = this.commit.additions + this.commit.deletions;
+    if (changeCount < Building.largeThreshold) {
+      model(this.model);
+    } else {
+      const levels = round(map(
+        changeCount,
+        Building.largeThreshold,
+        Building.largeThreshold * 20,
+        5,
+        20,
+        true
+      ));
+
+      model(this.model.bottom);
+      translate(0, -this.model.bottomHeight, 0);
+
+      for (let i = 0; i < levels; i++) {
+        model(this.model.mid);
+        translate(0, -this.model.midHeight, 0);
+      }
+
+      model(this.model.top);
+    }
 
     pop();
   }

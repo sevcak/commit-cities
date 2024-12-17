@@ -1,14 +1,15 @@
 let cities = [];
-let roads = [];
+
 let loading = false;
 let rotationY = 0;
-let cameraHeight = 800;
+const maxCameraHeight = 2000;
 let spacing = { building: 6, city: 20 };
 let buildingSpacing = 2;
 let scale = 6;
 const mapSize = 5000;
 const halfMapSize = mapSize / 2;
 const mapPadding = mapSize * 0.1;
+const pulseSpeed = 3.0;
 
 let time = 0;
 
@@ -16,8 +17,12 @@ let cam;
 
 let main_font = {};
 let gridTexture;
+let gridShader;
+
+let skybox;
 
 let activeCity;
+let activeColor;
 
 async function fetchGitHubData() {
     const username = document.getElementById('username').value;
@@ -81,40 +86,6 @@ function generateCities(repos) {
     }
 }
 
-function drawGrid() {
-    push();
-
-    rotateX(PI / 2);
-
-    textureMode(NORMAL);
-    textureWrap(REPEAT, REPEAT);
-    texture(gridTexture);
-
-    const tilesX = 220;
-    const tilesY = 220;
-    const halfPlaneSize = (mapSize * 1.2) / 2;
-    const bottomPlaneSize = mapSize;
-
-    // Bottom/ground grid
-    beginShape();
-    vertex(-bottomPlaneSize, -bottomPlaneSize, 0, 0);
-    vertex(bottomPlaneSize, -bottomPlaneSize, tilesX, 0);
-    vertex(bottomPlaneSize, bottomPlaneSize, tilesX, tilesY);
-    vertex(-bottomPlaneSize, bottomPlaneSize, 0, tilesY);
-    endShape(CLOSE);
-
-    // Top grid
-    translate(0, 0, max(400, -cam.eyeY + 100));
-    beginShape();
-    vertex(-halfPlaneSize, -halfPlaneSize, 0, 0);
-    vertex(halfPlaneSize, -halfPlaneSize, tilesX, 0);
-    vertex(halfPlaneSize, halfPlaneSize, tilesX, tilesY);
-    vertex(-halfPlaneSize, halfPlaneSize, 0, tilesY);
-    endShape(CLOSE);
-
-    pop();
-}
-
 function drawUI() {
     if (activeCity) {
         document.getElementById("city-info").style.setProperty('display', 'block');
@@ -124,8 +95,6 @@ function drawUI() {
 function openSettings() {
     const settingsElem = document.getElementById("settings");
 
-    document.getElementById('github-api-key').value = LOCAL_AUTH_TOKEN;
-
     settingsElem.style.setProperty("display", "flex");
 }
 
@@ -133,10 +102,6 @@ function applySettings() {
     const settingsElem = document.getElementById("settings");
 
     settingsElem.style.setProperty("display", "none");
-    const newApiKey = document.getElementById('github-api-key').value;
-    if (newApiKey) {
-        LOCAL_AUTH_TOKEN = newApiKey;
-    }
 }
 
 function handleCameraMovement() {
@@ -144,7 +109,7 @@ function handleCameraMovement() {
     orbitControl(sensitivity, sensitivity, sensitivity);
 
     cam.eyeX = constrain(cam.eyeX, -halfMapSize, halfMapSize);
-    cam.eyeY = constrain(cam.eyeY, -2000, -20);
+    cam.eyeY = constrain(cam.eyeY, -maxCameraHeight, -20);
     cam.eyeZ = constrain(cam.eyeZ, -halfMapSize, halfMapSize);
 }
 
@@ -172,28 +137,49 @@ const zeroPad = (num, places) => String(num).padStart(places, '0');
 function preload() {
     main_font.bold = loadFont('./assets/fonts/Roboto/Roboto-Bold.ttf');
 
+    Skybox.shader = loadShader('./assets/shaders/emit.vert', './assets/shaders/emit.frag');
+
     City.shader = loadShader('./assets/shaders/holo.vert', './assets/shaders/holo.frag');
-    gridTexture = loadImage('./assets/textures/grid.png');
+
+    Grid.texture = loadImage('./assets/textures/grid.png');
 
     const opts = 'normalize: true';
     for (let i = 1; i <= 6; i++) {
         Building.smallModels.push(loadModel('./assets/models/building_small_' + zeroPad(i, 2) + '.obj', opts));
     }
+    for (let i = 1; i <= 1; i++) {
+        const modelData = {
+            bottom: loadModel('./assets/models/building_large_' + zeroPad(i, 2) + '_bot.obj', opts),
+            mid: loadModel('./assets/models/building_large_' + zeroPad(i, 2) + '_mid.obj', opts),
+            top: loadModel('./assets/models/building_large_' + zeroPad(i, 2) + '_top.obj', opts)
+        };
+        Building.largeModels.push(modelData);
+    }
 }
 
 function setup() {
     createCanvas(windowWidth - 4, windowHeight - 4, WEBGL);
-
     colorMode(HSB);
     noStroke();
     textFont(main_font.bold);
 
+    for (let modelData of Building.largeModels) {
+        modelData.bottomHeight = modelData.bottom.calculateBoundingBox().size.y;
+        modelData.midHeight = modelData.mid.calculateBoundingBox().size.y;
+        modelData.topHeight = modelData.top.calculateBoundingBox().size.y;
+    }
+
     cam = createCamera();
+
+    activeColor = color(0, 0, 100);
+
+    skybox = new Skybox(mapSize * 1.2);
+    grid = new Grid();
 
     let aspect = width / height;
     let fov = 60; // Field of view in degrees
     let near = 1;
-    let far = 10000;
+    let far = 16000;
 
     // Convert fov to radians and calculate top and bottom
     let top = near * Math.tan((fov / 2) * (Math.PI / 180));
@@ -222,9 +208,13 @@ function setup() {
 function draw() {
     time += deltaTime / 1000;
 
-    background(26);
-
     handleCameraMovement();
+
+    if (activeCity) {
+        activeColor = lerpColor(activeColor, activeCity.color, 0.1);
+    }
+
+    skybox.draw();
 
     if (loading) {
         // Draw loading text in 2D
@@ -237,18 +227,24 @@ function draw() {
         return;
     }
 
-    // Lightin;
+    // Lighting
+
+    lightFalloff(
+        constrain(((sin(time * pulseSpeed) + 1) / 2), 0.6, 1),
+        0.0005 * constrain(((cos(time / pulseSpeed) + 1) / 2), 0.2, 1),
+        0
+    );
+
     ambientLight(0, 0, 20);
-    //const lightPos = createVector(cam.eyeX, -500, cam.eyeZ);
-    const lightColor = activeCity ? activeCity.color : color(0, 0, 100);
+
     // Camera light
-    pointLight(lightColor, createVector(cam.eyeX, -1000, cam.eyeZ));
+    pointLight(activeColor, createVector(cam.eyeX, -1000, cam.eyeZ));
     if (activeCity) {
         // Active city light
-        pointLight(lightColor, createVector(activeCity.pos.x, -100, activeCity.pos.y));
+        pointLight(activeColor, createVector(activeCity.pos.x, -100, activeCity.pos.y));
     }
 
-    drawGrid();
+    grid.draw();
 
     let minDist = 100000;
     let closestCity = activeCity;

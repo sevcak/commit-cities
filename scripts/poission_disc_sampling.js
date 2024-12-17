@@ -1,5 +1,5 @@
 class PoissonDiscSampling {
-  static generatePoints(radius, sampleRegionSize, pointCount, rejectionLimit = 30) {
+  static generatePoints(radius, sampleRegionSize, pointCount = undefined, rejectionLimit = 30) {
     const cellSize = radius / Math.sqrt(2);
 
     const grid = [];
@@ -20,7 +20,7 @@ class PoissonDiscSampling {
     //   random(radius, sampleRegionSize.y - radius))
     // );
     spawnPoints.push(createVector(sampleRegionSize.x / 2, sampleRegionSize.y / 2));
-    while (spawnPoints.length > 0 && points.length < pointCount) {
+    while (spawnPoints.length > 0 && (!pointCount || points.length < pointCount)) {
       const spawnIdx = floor(random(spawnPoints.length));
       const spawnCentre = spawnPoints[spawnIdx];
       let candidateAccepted = false;

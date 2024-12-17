@@ -28,6 +28,7 @@ class City {
 
       this.buildings.push(building);
     }
+    sampleRadius *= 1.2;
 
     const buildingPositions = PoissonDiscSampling.generatePoints(
       sampleRadius,
@@ -53,6 +54,7 @@ class City {
   shaderSetup() {
     shader(City.shader);
 
+    let cityHue = hue(this.color);
     const glowColor = color(
       hue(this.color),
       saturation(this.color),
@@ -64,8 +66,7 @@ class City {
     s.setUniform('uTime', time);
     s.setUniform('uMainColor', glowColor._array);
     s.setUniform('uAlpha', 0.8);
-    s.setUniform('uFlickerSpeed', 3.0);
-    //s.setUniform('uRimColor', [1.0, 1.0, 1.0, 1.0]);
+    s.setUniform('uFlickerSpeed', pulseSpeed * map(cityHue, 0, 360, 0.9, 1.1));
     s.setUniform('uRimColor', rimColor);
     s.setUniform('uRimPower', 4.0);
     s.setUniform('uGlowSpeed', 1.0);
