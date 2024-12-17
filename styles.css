@@ -67,6 +67,12 @@ button:hover {
         }
     }
 
+    #user-select {
+        option {
+        }
+        font-size: 1.5rem;
+    }
+
     #controls {
         z-index: 101;
 

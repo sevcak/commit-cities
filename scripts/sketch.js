@@ -21,6 +21,8 @@ let gridShader;
 
 let skybox;
 
+let downloadedCities = {};
+
 let activeCity;
 let activeCommit;
 let activeColor;
@@ -40,9 +42,15 @@ async function fetchGitHubData() {
         repos = repos.filter(
             repo => repo.commits && repo.commits.target && repo.commits.target.history.edges.length > 0
         );
-        localStorage.setItem("repos", JSON.stringify(repos));
 
-        localStorage.setItem("username", username);
+        if (!localStorage.getItem(username)) {
+            downloadedCities.users.push(username);
+            localStorage.setItem("downloadedCities", JSON.stringify(downloadedCities));
+            updateUserSelect();
+        }
+        localStorage.setItem(username, JSON.stringify(repos));
+
+        localStorage.setItem("lastCityUsername", username);
         document.getElementById("world-label-username").textContent = username;
         document.getElementById("world-label").style = "";
         generateCities(repos);
@@ -54,7 +62,32 @@ async function fetchGitHubData() {
     loading = false;
 }
 
+function updateUserSelect() {
+    const selectElem = document.getElementById("user-select");
+    selectElem.innerHTML = "";
+
+    for (let username of downloadedCities.users) {
+        const option = document.createElement("option");
+        option.label = username;
+        option.innerHTML = username;
+
+        selectElem.appendChild(option);
+    }
+}
+
+function loadCities(username) {
+    document.getElementById("world-label-username").textContent = username;
+    document.getElementById("world-label").style = "";
+
+    repos = JSON.parse(localStorage.getItem(username));
+    console.log(username, repos);
+    generateCities(repos);
+
+    localStorage.setItem("lastCityUsername", username);
+}
+
 function generateCities(repos) {
+    cities = [];
     let maxCommitCount = 1;
     for (let r of repos) {
         const commitCount = r.commits.target.history.edges.length;
@@ -242,14 +275,20 @@ function setup() {
     setCamera(cam);
     camera(800, -500, 1000);
 
-    repos = localStorage.getItem("repos");
-    if (repos) {
-        const username = localStorage.getItem("username");
-        document.getElementById("world-label-username").textContent = username;
-        document.getElementById("world-label").style = "";
+    downloadedCities = JSON.parse(localStorage.getItem("downloadedCities"));
+    if (!downloadedCities) {
+        downloadedCities = { users: [] };
+    }
+    updateUserSelect();
 
-        repos = JSON.parse(repos);
-        generateCities(repos);
+    document.getElementById("user-select").addEventListener("change", (event) => {
+        loadCities(event.target.value);
+    })
+
+    const lastCityUsername = localStorage.getItem("lastCityUsername");
+    if (lastCityUsername) {
+        loadCities(lastCityUsername);
+        document.getElementById("user-select").value = lastCityUsername;
     }
 }
 
