@@ -22,6 +22,7 @@ let gridShader;
 let skybox;
 
 let activeCity;
+let activeCommit;
 let activeColor;
 
 async function fetchGitHubData() {
@@ -126,9 +127,54 @@ function changeActiveCity(city) {
     for (let building of city.buildings) {
         const commit = building.commit;
 
-        const commitElem = document.createElement("div");
+        const commitElem = document.createElement("a");
+        commitElem.href = commit.url
+        commitElem.target = "_blank";
         commitElem.className = "city-info-commit";
-        commitElem.innerHTML = '#' + commit.oid.substring(0, 7);
+
+        const idElem = document.createElement("div");
+        idElem.className = "commit-id";
+        idElem.innerHTML = '#' + commit.oid.substring(0, 7);
+
+        const msgElem = document.createElement("div");
+        msgElem.className = "commit-message";
+        msgElem.innerHTML = '"' + commit.message + '"';
+
+
+        const headerElem = document.createElement("div");
+        headerElem.className = "commit-header";
+
+        const headerLeft = document.createElement("div");
+        headerLeft.className = "commit-header-left";
+        headerLeft.appendChild(idElem);
+        headerLeft.innerHTML += ' by '
+
+        const usernameElem = document.createElement("div");
+        const username = commit.author.user ? commit.author.user.login : commit.author.name;
+        usernameElem.innerHTML = username;
+        usernameElem.className = "username";
+        headerLeft.appendChild(usernameElem);
+
+        headerElem.appendChild(headerLeft);
+
+        const changesElem = document.createElement("div");
+        changesElem.className = "commit-changes"
+        const additionsElem = document.createElement("div");
+        additionsElem.className = "additions";
+        additionsElem.innerHTML = "+" + commit.additions;
+        changesElem.appendChild(additionsElem);
+        const deletionsElem = document.createElement("div");
+        deletionsElem.className = "deletions";
+        deletionsElem.innerHTML = "-" + commit.deletions;
+        changesElem.appendChild(deletionsElem);
+
+        commitElem.appendChild(headerElem);
+        commitElem.appendChild(msgElem);
+        commitElem.appendChild(changesElem);
+
+        commitElem.addEventListener("mouseenter", (event) => {
+            activeCommit = commit;
+        })
 
         commitList.appendChild(commitElem);
     }

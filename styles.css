@@ -1,7 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    font-family: "Roboto Mono", monospace;
 }
 
 body {
@@ -9,7 +12,6 @@ body {
     padding: 0;
     background: #1a1a1a;
     color: white;
-    font-family: Arial, sans-serif;
     overflow: hidden;
 }
 
@@ -55,9 +57,14 @@ button:hover {
         gap: 1rem;
 
         padding: 1rem;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         height: 100%;
-        backdrop-filter: blur(6px);
+        backdrop-filter: blur(8px);
+
+        .ui-box-box {
+            max-height: 100%;
+            max-width: 100%;
+        }
     }
 
     #controls {
@@ -76,16 +83,82 @@ button:hover {
         flex-direction: row;
         justify-content: center;
         align-items: center;
+
+        .username {
+            text-transform: none;
+        }
     }
 
-    #city-info-commits {
-        overflow-y: scroll;
-        display: flex;
-        flex-direction: column;
-        gap: .6rem;
+    #city-info {
+        resize: horizontal;
+        overflow: hidden;
+        width: 31rem;
+        height: 100%;
 
-        .city-info-commit {
-            text-transform: lowercase;
+        #city-info-commits {
+            overflow-x: hidden;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+            margin: 0 -1rem 0 0;
+            padding-bottom: 2rem;
+
+            .city-info-commit {
+                padding: 0 0 1rem .4rem;
+                color: inherit;
+                text-decoration: none;
+
+                .commit-header {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: space-between;
+                    justify-content: space-between;
+
+                    .commit-header-left {
+                        display: flex;
+                        flex-direction: row;
+                        gap: .8rem;
+
+                        .username {
+                            text-transform: none;
+                        }
+                    } 
+                }
+                .commit-changes {
+                    display: flex;
+                    flex-direction: row;
+                    padding: 0 .4rem;
+                    gap: .8rem;
+
+                    .additions {
+                        color: #88d952;
+                    }
+                    .deletions {
+                        color: #db5635;
+                    }
+                }
+
+                .commit-id {
+                    font-weight: bold;
+                    user-select: none;
+                }
+
+                .commit-message {
+                    text-transform: none;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    user-select: none;
+                }
+            }
+            .city-info-commit:hover {
+                background: rgba(0, 0, 0, 0.6);
+
+                .commit-id {
+                    font-weight: 800;
+                }
+            }
         }
     }
 

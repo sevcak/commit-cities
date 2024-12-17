@@ -52,6 +52,7 @@ class City {
   }
 
   shaderSetup() {
+    resetShader();
     shader(City.shader);
 
     let cityHue = hue(this.color);

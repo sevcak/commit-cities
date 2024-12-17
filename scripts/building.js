@@ -22,6 +22,12 @@ class Building {
   draw() {
     push();
 
+    let prevRimPower;
+    if (this.commit == activeCommit) {
+      prevRimPower = City.shader.uniforms.uRimPower._cachedData;
+      City.shader.setUniform('uRimPower', 0.4);
+    }
+
     translate(this.pos.x, 0, this.pos.y);
     rotateY(this.rotation);
 
@@ -47,6 +53,10 @@ class Building {
       }
 
       model(this.model.top);
+    }
+
+    if (this.commit == activeCommit) {
+      City.shader.setUniform('uRimPower', prevRimPower);
     }
 
     pop();
