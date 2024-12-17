@@ -63,7 +63,7 @@ button:hover {
     #controls {
         z-index: 101;
 
-        .settings-button {
+        .icon-button {
             padding: .5rem .6rem;
         }
     }
