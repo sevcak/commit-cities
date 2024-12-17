@@ -102,6 +102,8 @@ function applySettings() {
     const settingsElem = document.getElementById("settings");
 
     settingsElem.style.setProperty("display", "none");
+
+    LOCAL_AUTH_TOKEN = document.getElementById("github-api-key").value;
 }
 
 function handleCameraMovement() {
