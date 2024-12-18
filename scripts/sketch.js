@@ -28,6 +28,52 @@ let activeCity;
 let activeCommit;
 let activeColor;
 
+function displayModal(header, description) {
+    document.getElementById("modal").style.setProperty("display", "flex");
+    document.getElementById("modal-header").innerHTML = header;
+    document.getElementById("modal-content").innerHTML = "";
+    document.getElementById("modal-content").appendChild(description);
+}
+
+function closeModal() {
+    const modalElem = document.getElementById("modal");
+    modalElem.style.setProperty("display", "none");
+}
+
+function getControlsItem(iconPath, description) {
+    const itemElem = document.createElement("div");
+    itemElem.className = "modal-content-item";
+    const iconElem = document.createElement("img");
+    iconElem.src = iconPath;
+    iconElem.className = "icon";
+    itemElem.appendChild(iconElem);
+    const descElem = document.createElement("div");
+    descElem.innerHTML = description;
+    itemElem.appendChild(descElem);
+
+    return itemElem;
+}
+
+function openControls() {
+    const controlsElem = document.createElement("div");
+    controlsElem.className = "modal-content";
+
+    controlsElem.appendChild(getControlsItem(
+        "./assets/icons/turn-icon.svg",
+        "Single finger drag: Orbit/turn the camera around"
+    ));
+    controlsElem.appendChild(getControlsItem(
+        "./assets/icons/pan-icon.svg",
+        "Two finger drag: Pan/Move the camera"
+    ));
+    controlsElem.appendChild(getControlsItem(
+        "./assets/icons/pinch-icon.svg",
+        "Pinch: Zoom/Move the camera closer"
+    ));
+
+    displayModal("Controls", controlsElem);
+}
+
 async function fetchGitHubData() {
     const username = document.getElementById('username').value;
     if (!username) return;
@@ -39,8 +85,8 @@ async function fetchGitHubData() {
         let newRepos = await fetch_github_data({
             username: username, repoLimit: 15, commitLimit: 20
         });
-        repos = newRepos;
-        repos = repos.filter(
+
+        repos = newRepos.filter(
             repo => repo.commits && repo.commits.target && repo.commits.target.history.edges.length > 0
         );
 
@@ -54,13 +100,18 @@ async function fetchGitHubData() {
         localStorage.setItem("lastCityUsername", username);
         document.getElementById("world-label-username").textContent = username;
         document.getElementById("world-label").style = "";
-        generateCities(repos);
+
+        document.getElementById("user-select").value = username;
 
     } catch (error) {
         console.error('Error fetching GitHub data:', error);
+        const errorTextElem = document.createElement("div");
+        errorTextElem.innerHTML = "There was an error while fetching data from GitHub. Please try again";
+        displayModal("Error", errorTextElem);
     }
 
     loading = false;
+    generateCities(repos);
 }
 
 function updateUserSelect() {
